@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import random
+from algorithms import *
 
 class BernoulliArm():
 	def __init__(self, p):
@@ -12,32 +13,6 @@ class BernoulliArm():
 			return 1.0
 		else:
 			return 0.0
-
-class EpsilonGreedy():
-	def __init__(self, epsilon, counts, values):
-		self.epsilon = epsilon
-		self.counts = counts
-		self.values = values
-
-	def initialize(self, n_arms):
-		self.counts = np.zeros(n_arms)
-		self.values = np.zeros(n_arms)
-
-	def select_arm(self):
-		if self.epsilon > random.random():
-			# 確率εで探索を行う
-			return np.random.randint(0, len(self.values))
-		else:
-			# 確率1-εで活用を行う
-			return np.argmax(self.values)
-
-	def update(self, chosen_arm, reward):
-		self.counts[chosen_arm] = self.counts[chosen_arm] + 1 # アームを選んだ回数を更新
-		n = self.counts[chosen_arm]
-
-		value = self.values[chosen_arm]
-		new_value = ((n-1) / float(n)) * value + (1 / float(n)) * reward
-		self.values[chosen_arm] = new_value
 
 def test_algorithm(algo, arms, num_sims, horizon):
 	# 変数の初期化
@@ -50,6 +25,9 @@ def test_algorithm(algo, arms, num_sims, horizon):
 	for sim in range(num_sims):
 		sim = sim + 1 # シミュレーション回数をカウント
 		algo.initialize(len(arms)) # アルゴリズム設定を初期化
+
+		if sim % 100 == 0:
+			print(sim)
 
 		for t in range(horizon):
 			t = t + 1 # ラウンドの回数をカウント
@@ -74,23 +52,45 @@ def test_algorithm(algo, arms, num_sims, horizon):
 	return [sim_nums, times, chosen_arms, rewards, cumulative_rewards]
 
 def main():
-	theta = np.array([0.1, 0.1, 0.1, 0.1, 0.9]) # アームから報酬が得られる成功確率
+	theta = np.array([0.2, 0.3, 0.4, 0.5]) # アームから報酬が得られる成功確率
 	n_arms = len(theta)
 	random.shuffle(theta)
 
 	arms = map(lambda x: BernoulliArm(x), theta)
 	arms = list(arms) # armsをリスト化する
 
-	for epsilon in [0.1, 0.2, 0.3, 0.4, 0.5]:
-		algo = EpsilonGreedy(epsilon, [], [])
-		algo.initialize(n_arms)
-		results = test_algorithm(algo, arms, 5000, 250) # シミュレーションの実行結果をresultsへ格納
+	NUM_SIMS = 10000
+	HORIZON = 10000
 
-		# プロット
-		df = pd.DataFrame({"times": results[1], "rewards": results[3]})
-		grouped = df["rewards"].groupby(df["times"])
+	#### Greedy ####
+	algo_greedy = Greedy([], [])
+	algo_greedy.initialize(n_arms)
+	results = test_algorithm(algo_greedy, arms,  NUM_SIMS, HORIZON)
 
-		plt.plot(grouped.mean(), label="epsilon="+str(epsilon)) # 各ラウンドごとの報酬の平均値をεの値ごとにプロットする
+	df = pd.DataFrame({"times": results[1], "rewards": results[3]})
+	grouped = df["rewards"].groupby(df["times"])
+
+	plt.plot(grouped.mean(), label="Greedy") # 各ラウンドごとの報酬の平均値をεの値ごとにプロットする
+
+	#### e-Greedy ####
+	algo_egreedy = EpsilonGreedy(0.1, [], [])
+	algo_egreedy.initialize(n_arms)
+	results = test_algorithm(algo_egreedy, arms, NUM_SIMS, HORIZON)
+
+	df = pd.DataFrame({"times": results[1], "rewards": results[3]})
+	grouped = df["rewards"].groupby(df["times"])
+
+	plt.plot(grouped.mean(), label="e-Greedy") # 各ラウンドごとの報酬の平均値をεの値ごとにプロットする
+
+	#### UCB1 ####
+	algo_ucb = UCB([], [])
+	algo_ucb.initialize(n_arms)
+	results = test_algorithm(algo_ucb, arms, NUM_SIMS, HORIZON)
+
+	df = pd.DataFrame({"times": results[1], "rewards": results[3]})
+	grouped = df["rewards"].groupby(df["times"])
+
+	plt.plot(grouped.mean(), label="UCB1") # 各ラウンドごとの報酬の平均値をεの値ごとにプロットする
 
 	plt.legend(loc="best")
 	plt.show()
