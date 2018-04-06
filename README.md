@@ -21,6 +21,12 @@ greedyアルゴリズムとε-greedyアルゴリズムとUCB1アルゴリズム�
 	- random
 	- math
 
+# 実行方法
+
+以下のコマンドを実行する。
+
+`python multi-armed_bandit.py`
+
 # 結果
 
 プログラム実行結果は以下のようになった。
