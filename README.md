@@ -33,3 +33,7 @@ greedyアルゴリズムとε-greedyアルゴリズムとUCB1アルゴリズム�
 なお、縦軸が時間辺りの平均報酬で横軸がプレイ回数である。
 
 ![実行結果](https://raw.githubusercontent.com/MotoShin/multi-armed_bandit_problem/images/figure_1.png)
+
+# 考察
+
+プログラム実行結果よりこの多腕バンディット問題ではUCB1、ε-greedy、greedyの順で良い結果になることがわかった。
