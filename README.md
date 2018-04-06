@@ -25,4 +25,4 @@ greedyアルゴリズムとε-greedyアルゴリズムとUCB1アルゴリズム�
 
 プログラム実行結果は以下のようになった。
 
-![実行結果](https://github.com/MotoShin/multi-armed_bandit_problem/images/images/figure_1.png)
+![実行結果](https://raw.githubusercontent.com/MotoShin/multi-armed_bandit_problem/images/figure_1.png)
